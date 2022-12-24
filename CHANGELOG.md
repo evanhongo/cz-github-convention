@@ -1,3 +1,8 @@
+## v0.1.2 (2022-12-24)
+
+
+- 🐛 fix(setup.py): version 0.1.2 [881c4](https://github.com/evanhongo/cz-github-convention/commit/881c4b187ac1aa8eb93df8810d0210e99de6e9dc)
+
 ## v0.1.1 (2022-12-24)
 
 

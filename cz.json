@@ -1,7 +1,7 @@
 {
   "commitizen": {
     "name": "cz_github_convention",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "tag_format": "v$version",
     "github_repo": "evanhongo/cz-github-convention"
   }
