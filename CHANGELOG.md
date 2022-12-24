@@ -1,4 +1,4 @@
 ## v0.1.0 (2022-12-24)
 
 
-- 🎉 feat(cz_github_convention.py): emoji and github support [6dbf0](https://github.com/evanhongo/cz-github-convention/commit/6dbf0f70987b7627d6df69151a00e59219d15876)
+- 🎉 feat(cz_github_convention.py): emoji and support for github [f4bb0](https://github.com/evanhongo/cz-github-convention/commit/f4bb0d2e00d8e1c61b815d97153a7707132b669c)
