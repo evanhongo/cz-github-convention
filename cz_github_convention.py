@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 from typing import Any, Dict, List
-from commitizen import defaults, git, config
+from commitizen import git, config
 from commitizen.cz.base import BaseCommitizen
 from commitizen.cz.utils import multiple_line_breaker, required_validator
 from commitizen.cz.exceptions import CzException
