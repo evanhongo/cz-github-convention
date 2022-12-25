@@ -1,7 +1,6 @@
 import re
-from collections import OrderedDict
 from typing import Any, Dict, List
-from commitizen import git, config
+from commitizen import git, config, defaults
 from commitizen.cz.base import BaseCommitizen
 from commitizen.cz.utils import multiple_line_breaker, required_validator
 from commitizen.cz.exceptions import CzException
@@ -29,21 +28,11 @@ def parse_subject(text):
 
 
 class GithubConventionCz(BaseCommitizen):
-    bump_pattern = (
-        r"^(BREAKING[\-\ ]CHANGE|🎉? ?feat|🐛? ?fix|🔧? ?refactor|🚀? ?perf)(\(.+\))?(!)?"
-    )
-    bump_map = OrderedDict(
-        (
-            (r"^.+!$", MAJOR),
-            (r"^BREAKING[\-\ ]CHANGE", MAJOR),
-            (r"^🎉? ?feat", MINOR),
-            (r"^🐛? ?fix", PATCH),
-            (r"^🔧? ?refactor", PATCH),
-            (r"^🚀? ?perf", PATCH),
-        )
-    )
-    changelog_pattern = bump_pattern
-
+    bump_pattern = defaults.bump_pattern
+    bump_map = defaults.bump_map
+    commit_parser = defaults.commit_parser
+    changelog_pattern = defaults.bump_pattern
+    
     # Read the config file and check if required settings are available
     conf = config.read_cfg()
 
@@ -68,16 +57,16 @@ class GithubConventionCz(BaseCommitizen):
                 "message": "Select the type of change you are committing",
                 "choices": [
                     {
-                        "value": "🐛 fix",
+                        "value": "fix",
                         "name": "🐛 fix: A bug fix. Correlates with PATCH in SemVer",
                     },
                     {
-                        "value": "🎉 feat",
+                        "value": "feat",
                         "name": "🎉 feat: A new feature. Correlates with MINOR in SemVer",
                     },
-                    {"value": "📜 docs", "name": "📜 docs: Documentation only changes"},
+                    {"value": "docs", "name": "📜 docs: Documentation only changes"},
                     {
-                        "value": "😎 style",
+                        "value": "style",
                         "name": (
                             "😎 style: Changes that do not affect the "
                             "meaning of the code (white-space, formatting,"
@@ -85,34 +74,41 @@ class GithubConventionCz(BaseCommitizen):
                         ),
                     },
                     {
-                        "value": "🔧 refactor",
+                        "value": "refactor",
                         "name": (
-                            "🔧 refactor: A code change that neither fixes "
+                            "🔨 refactor: A code change that neither fixes "
                             "a bug nor adds a feature"
                         ),
                     },
                     {
-                        "value": "🚀 perf",
+                        "value": "perf",
                         "name": "🚀 perf: A code change that improves performance",
                     },
                     {
-                        "value": "🚦 test",
+                        "value": "test",
                         "name": (
                             "🚦 test: Adding missing or correcting " "existing tests"
                         ),
                     },
                     {
-                        "value": "🚧 build",
+                        "value": "build",
                         "name": (
                             "🚧 build: Changes that affect the build system or "
                             "external dependencies (example scopes: pip, docker, npm)"
                         ),
                     },
                     {
-                        "value": "🛸 ci",
+                        "value": "ci",
                         "name": (
                             "🛸 ci: Changes to our CI configuration files and "
                             "scripts (example scopes: GitLabCI)"
+                        ),
+                    },
+                    {
+                        "value": "chore",
+                        "name": (
+                            "🔧 chore: A code change that external user won't see "
+                            "(eg: change to .gitignore) "
                         ),
                     },
                 ],
