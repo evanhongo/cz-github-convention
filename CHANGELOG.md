@@ -1,3 +1,9 @@
+## v1.0.0 (2024-01-03)
+
+### BREAKING CHANGE
+
+- **cz_github_convention.py**: migrate to new plugin format (commitizen 3.0.0) [cad25](https://github.com/evanhongo/cz-github-convention/commit/cad2566da8144d89b8aa96fccad4cf22165f15cf)
+
 ## v0.2.0 (2022-12-25)
 
 ### Feat
