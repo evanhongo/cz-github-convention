@@ -1,13 +1,11 @@
 import re
-from typing import Any, Dict, List
 from commitizen import git, config, defaults
+from commitizen.defaults import  Questions
 from commitizen.cz.base import BaseCommitizen
 from commitizen.cz.utils import multiple_line_breaker, required_validator
 from commitizen.cz.exceptions import CzException
-from commitizen.defaults import MAJOR, MINOR, PATCH
 
-__all__ = ["GithubConventionCz"]
-
+__all__ = ["GithubConventionPluginCz"]
 
 def parse_scope(text):
     if not text:
@@ -17,7 +15,7 @@ def parse_scope(text):
     if len(scope) == 1:
         return scope[0]
 
-    return "-".join(scope)
+    return ",".join(scope)
 
 
 def parse_subject(text):
@@ -27,12 +25,7 @@ def parse_subject(text):
     return required_validator(text, msg="Subject is required.")
 
 
-class GithubConventionCz(BaseCommitizen):
-    bump_pattern = defaults.bump_pattern
-    bump_map = defaults.bump_map
-    commit_parser = defaults.commit_parser
-    changelog_pattern = defaults.bump_pattern
-    
+class GithubConventionPluginCz(BaseCommitizen):
     # Read the config file and check if required settings are available
     conf = config.read_cfg()
 
@@ -41,38 +34,49 @@ class GithubConventionCz(BaseCommitizen):
         quit()
 
     github_repo = conf.settings["github_repo"]
-    # if "change_type_map" not in conf.settings:
+    
+    
+    bump_pattern = r"^(break|feat|fix|refactor|perf)" 
+    bump_map = {
+        "break": "MAJOR", 
+        "feat": "MINOR", 
+        "fix": "PATCH", 
+        "refactor": "PATCH", 
+        "perf": "PATCH"
+    }
+    
+    changelog_pattern = r"^(break|feat|fix|refactor|perf)"
     change_type_map = {
+        "break": "BREAKING CHANGE",
         "feat": "Feat",
         "fix": "Fix",
         "refactor": "Refactor",
-        "perf": "Perf",
+        "perf": "Performance",
     }
-
-    def questions(self) -> List[Dict[str, Any]]:
-        questions: List[Dict[str, Any]] = [
+    change_type_order = ["break", "feat", "fix", "refactor", "perf"]
+    
+    commit_parser = r"^((?P<change_type>break|feat|fix|refactor|perf)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?|\w+!):\s(?P<message>.*)?"
+    
+    def questions(self) -> Questions:
+        questions = [
             {
                 "type": "list",
                 "name": "prefix",
                 "message": "Select the type of change you are committing",
                 "choices": [
                     {
-                        "value": "fix",
-                        "name": "🐛 fix: A bug fix. Correlates with PATCH in SemVer",
+                        "value": "break",
+                        "name": "🔥 break: BREAKING CHANGE! Correlates with MAJOR in SemVer",
                     },
                     {
                         "value": "feat",
                         "name": "🎉 feat: A new feature. Correlates with MINOR in SemVer",
                     },
-                    {"value": "docs", "name": "📜 docs: Documentation only changes"},
                     {
-                        "value": "style",
-                        "name": (
-                            "😎 style: Changes that do not affect the "
-                            "meaning of the code (white-space, formatting,"
-                            " missing semi-colons, etc)"
-                        ),
+                        "value": "fix",
+                        "name": "🐛 fix: A bug fix. Correlates with PATCH in SemVer",
                     },
+
                     {
                         "value": "refactor",
                         "name": (
@@ -82,12 +86,23 @@ class GithubConventionCz(BaseCommitizen):
                     },
                     {
                         "value": "perf",
-                        "name": "🚀 perf: A code change that improves performance",
+                        "name": "🚀 perf: A code change that improves performance"
                     },
                     {
                         "value": "test",
                         "name": (
                             "🚦 test: Adding missing or correcting " "existing tests"
+                        ),
+                    },
+                    {   "value": "docs", 
+                        "name": "📜 docs: Documentation only changes"
+                    },
+                    {
+                        "value": "style",
+                        "name": (
+                            "😎 style: Changes that do not affect the "
+                            "meaning of the code (white-space, formatting,"
+                            " missing semi-colons, etc)"
                         ),
                     },
                     {
@@ -139,12 +154,6 @@ class GithubConventionCz(BaseCommitizen):
                 "filter": multiple_line_breaker,
             },
             {
-                "type": "confirm",
-                "message": "Is this a BREAKING CHANGE? Correlates with MAJOR in SemVer",
-                "name": "is_breaking_change",
-                "default": False,
-            },
-            {
                 "type": "input",
                 "name": "footer",
                 "message": (
@@ -161,40 +170,33 @@ class GithubConventionCz(BaseCommitizen):
         scope = answers["scope"]
         subject = answers["subject"]
         body = answers["body"]
-        footer = answers["footer"]
-        is_breaking_change = answers["is_breaking_change"]
+        footer = answers["footer"]        
         if scope:
             scope = f"({scope})"
         if body:
-            body = f"\n\n{body}"
-        if is_breaking_change:
-            footer = f"BREAKING CHANGE 🚨: {footer}"
+            body = f"\n{body}"
         if footer:
-            footer = f"\n\n{footer}"
+            footer = f"\n{footer}"
         message = f"{prefix}{scope}: {subject}{body}{footer}"
         return message
 
     def example(self) -> str:
         return (
             "fix(#12): correct minor typos in code\n"
-            "\n"
             "see the issue for details on the typos fixed\n"
-            "\n"
             "closes issue #12"
         )
 
     def schema(self) -> str:
         return (
             "<type>(<scope>): <subject>\n"
-            "<BLANK LINE>\n"
             "<body>\n"
-            "<BLANK LINE>\n"
-            "(BREAKING CHANGE 🚨: )<footer>"
+            "<footer>"
         )
 
     def schema_pattern(self) -> str:
         PATTERN = (
-            r"(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert|bump)"
+            r"(break|feat|fix|refactor|perf|test|docs|style|build|ci|chore|revert|bump)"
             r"(\(\S+\))?!?:(\s.*)"
         )
         return PATTERN
@@ -220,6 +222,3 @@ class GithubConventionCz(BaseCommitizen):
 
 class InvalidAnswerError(CzException):
     ...
-
-
-discover_this = GithubConventionCz

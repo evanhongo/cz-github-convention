@@ -3,6 +3,7 @@
     "name": "cz_github_convention",
     "version": "0.2.0",
     "tag_format": "v$version",
-    "github_repo": "evanhongo/cz-github-convention"
+    "github_repo": "evanhongo/cz-github-convention",
+    "update_changelog_on_bump": true
   }
 }
